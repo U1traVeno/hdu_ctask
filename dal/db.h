@@ -7,16 +7,16 @@
 
 #include <sqlite3.h>
 
+// 打开数据库
 sqlite3* db_open(const char* path);
-// 执行sql语句
-int execute_sql(sqlite3* db, const char* sql);
-void db_close(sqlite3* db);
 
-// 各个表通用字段结构体，包含ID, CreatedAt, UpdatedAt, DeletedAt, 用于嵌入到各个表的结构体中
-typedef struct {
-    int id;
-    char* created_at;
-    char* updated_at;
-    char* deleted_at;
-} BaseModel;
+// 获取数据库连接
+sqlite3* get_db();
+
+// 执行SQL语句
+int execute_sql(const char* sql);
+
+// 关闭数据库
+void db_close();
+
 #endif //DB_H

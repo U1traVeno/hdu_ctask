@@ -7,8 +7,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../db.h"
 
-int create_product_table(sqlite3* db) {
+int create_product_table() {
     const char* sql = "CREATE TABLE IF NOT EXISTS products ("
                       "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                       "name TEXT NOT NULL,"
@@ -19,10 +20,11 @@ int create_product_table(sqlite3* db) {
                       "updated_at TEXT DEFAULT CURRENT_TIMESTAMP,"
                       "deleted_at TEXT"
                       ");";
-    return execute_sql(db, sql);
+    return execute_sql(sql);
 }
 
-int add_product(sqlite3* db, Product* product) {
+int add_product(Product* product) {
+    sqlite3* db = get_db();
     const char* sql = "INSERT INTO products (name, type, description, price) VALUES (?, ?, ?, ?);";
     sqlite3_stmt* stmt;
 
@@ -45,7 +47,8 @@ int add_product(sqlite3* db, Product* product) {
     return rc == SQLITE_DONE ? SQLITE_OK : rc;
 }
 
-int delete_product(sqlite3* db, int id) {
+int delete_product(int id) {
+    sqlite3* db = get_db();
     const char* sql = "DELETE FROM products WHERE id = ?;";
     sqlite3_stmt* stmt;
 
@@ -65,7 +68,33 @@ int delete_product(sqlite3* db, int id) {
     return rc == SQLITE_DONE ? SQLITE_OK : rc;
 }
 
-Product* product_find_by_id(sqlite3* db, int id) {
+int update_product(Product* product) {
+    sqlite3* db = get_db();
+    const char* sql = "UPDATE products SET name = ?, type = ?, description = ?, price = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?;";
+    sqlite3_stmt* stmt;
+
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
+        return SQLITE_ERROR;
+    }
+
+    sqlite3_bind_text(stmt, 1, product->name, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, product->type, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, product->description, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_double(stmt, 4, product->price);
+    sqlite3_bind_int(stmt, 5, product->base_model.id);
+
+    const int rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        fprintf(stderr, "Failed to update product: %s\n", sqlite3_errmsg(db));
+    }
+
+    sqlite3_finalize(stmt);
+    return rc == SQLITE_DONE ? SQLITE_OK : rc;
+}
+
+Product* product_find_by_id(int id) {
+    sqlite3* db = get_db();
     const char* sql = "SELECT id, name, type, description, price, created_at, updated_at, deleted_at FROM products WHERE id = ?;";
     sqlite3_stmt* stmt;
 
@@ -93,7 +122,8 @@ Product* product_find_by_id(sqlite3* db, int id) {
     return product;
 }
 // 按名字查找产品
-Product* product_find_by_name(sqlite3* db, const char* name) {
+Product* product_find_by_name(const char* name) {
+    sqlite3* db = get_db();
     const char* sql = "SELECT id, name, type, description, price, created_at, updated_at, deleted_at FROM products WHERE name = ?;";
     sqlite3_stmt* stmt;
 
@@ -133,7 +163,8 @@ void free_products(Product** products) {
     free(products);
 }
 
-Product** product_find_all(sqlite3* db) {
+Product** product_find_all() {
+    sqlite3* db = get_db();
     const char* sql = "SELECT id, name, type, description, price, created_at, updated_at, deleted_at FROM products;";
     sqlite3_stmt* stmt;
 
@@ -186,7 +217,8 @@ Product** product_find_all(sqlite3* db) {
 }
 
 // 产品总数
-int product_count(sqlite3* db) {
+int product_count() {
+    sqlite3* db = get_db();
     const char* sql = "SELECT COUNT(*) FROM products;";
     sqlite3_stmt* stmt;
 

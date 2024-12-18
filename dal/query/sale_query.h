@@ -4,19 +4,18 @@
 
 #ifndef SALES_QUERY_H
 #define SALES_QUERY_H
-#include "../db.h"
 #include "../model/sale.h"
 
 // 创建销售表，如果表不存在则创建，存在则不做任何操作，默认销售表有id, employee_id, product_id, quantity, price, date字段
-int create_sales_table(sqlite3* db);
+int create_sales_table();
 // 增删改查
-int add_sales(sqlite3* db, Sale* sale);
-int delete_sales(sqlite3* db, int id);
-int update_sales(sqlite3* db, Sale* sale);
-Sale* sales_find_by_id(sqlite3* db, int id);
-Sale* sales_find_by_employee_id(sqlite3* db, int employee_id);
-Sale* sales_find_by_product_id(sqlite3* db, int product_id);
-Sale** sales_find_all(sqlite3* db);
-int sales_count(sqlite3* db);
+int add_sale(const Sale* sale);
+int delete_sale(int id);
+int update_sale(const Sale* sale);
+Sale* sale_find_by_id(int id);
+Sale* sale_find_by_employee_id(int employee_id);
+Sale* sale_find_by_product_id(int product_id);
+Sale** sale_find_all();
+int sales_count();
 
 #endif //SALES_QUERY_H

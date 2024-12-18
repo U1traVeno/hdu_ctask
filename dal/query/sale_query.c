@@ -7,8 +7,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../db.h"
 
-int create_sale_table(sqlite3* db) {
+int create_sale_table() {
     const char* sql = "CREATE TABLE IF NOT EXISTS sales ("
                       "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                       "product_id INTEGER NOT NULL,"
@@ -19,10 +20,11 @@ int create_sale_table(sqlite3* db) {
                       "updated_at TEXT DEFAULT CURRENT_TIMESTAMP,"
                       "deleted_at TEXT"
                       ");";
-    return execute_sql(db, sql);
+    return execute_sql(sql);
 }
 
-int add_sale(sqlite3* db, const Sale* sale) {
+int add_sale(const Sale* sale) {
+    sqlite3* db = get_db();
     const char* sql = "INSERT INTO sales (product_id, employee_id, quantity, price) VALUES (?, ?, ?, ?);";
     sqlite3_stmt* stmt;
 
@@ -45,7 +47,8 @@ int add_sale(sqlite3* db, const Sale* sale) {
     return rc == SQLITE_DONE ? SQLITE_OK : rc;
 }
 
-int delete_sale(sqlite3* db, const int id) {
+int delete_sale(const int id) {
+    sqlite3* db = get_db();
     const char* sql = "DELETE FROM sales WHERE id = ?;";
     sqlite3_stmt* stmt;
 
@@ -65,7 +68,8 @@ int delete_sale(sqlite3* db, const int id) {
     return rc == SQLITE_DONE ? SQLITE_OK : rc;
 }
 
-int update_sale(sqlite3* db, const Sale* sale) {
+int update_sale(const Sale* sale) {
+    sqlite3* db = get_db();
     const char* sql = "UPDATE sales SET product_id = ?, employee_id = ?, quantity = ?, price = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?;";
     sqlite3_stmt* stmt;
 
@@ -89,7 +93,8 @@ int update_sale(sqlite3* db, const Sale* sale) {
     return rc == SQLITE_DONE ? SQLITE_OK : rc;
 }
 
-Sale* sale_find_by_id(sqlite3* db, const int id) {
+Sale* sale_find_by_id(const int id) {
+    sqlite3* db = get_db();
     const char* sql = "SELECT id, product_id, employee_id, quantity, price, created_at, updated_at, deleted_at FROM sales WHERE id = ?;";
     sqlite3_stmt* stmt;
 
@@ -117,7 +122,8 @@ Sale* sale_find_by_id(sqlite3* db, const int id) {
     return sale;
 }
 
-Sale* sale_find_by_employee_id(sqlite3* db, const int employee_id) {
+Sale* sale_find_by_employee_id(const int employee_id) {
+    sqlite3* db = get_db();
     const char* sql = "SELECT id, product_id, employee_id, quantity, price, created_at, updated_at, deleted_at FROM sales WHERE employee_id = ?;";
     sqlite3_stmt* stmt;
 
@@ -145,7 +151,8 @@ Sale* sale_find_by_employee_id(sqlite3* db, const int employee_id) {
     return sale;
 }
 
-Sale* sale_find_by_product_id(sqlite3* db, const int product_id) {
+Sale* sale_find_by_product_id(const int product_id) {
+    sqlite3* db = get_db();
     const char* sql = "SELECT id, product_id, employee_id, quantity, price, created_at, updated_at, deleted_at FROM sales WHERE product_id = ?;";
     sqlite3_stmt* stmt;
 
@@ -183,7 +190,8 @@ void free_sales(Sale** sales) {
     free(sales);
 }
 
-Sale** sale_find_all(sqlite3* db) {
+Sale** sale_find_all() {
+    sqlite3* db = get_db();
     const char* sql = "SELECT id, product_id, employee_id, quantity, price, created_at, updated_at, deleted_at FROM sales;";
     sqlite3_stmt* stmt;
 
@@ -256,7 +264,8 @@ Sale** sale_find_all(sqlite3* db) {
 
 
 
-int sale_count(sqlite3* db) {
+int sale_count() {
+    sqlite3* db = get_db();
     const char* sql = "SELECT COUNT(*) FROM sales;";
     sqlite3_stmt* stmt;
     int count = 0;

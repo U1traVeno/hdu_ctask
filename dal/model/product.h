@@ -4,6 +4,7 @@
 
 #ifndef PRODUCT_H
 #define PRODUCT_H
+#include "base_model.h"
 
 typedef struct {
     BaseModel base_model;
@@ -12,4 +13,5 @@ typedef struct {
     char* description;
     double price;
 } Product;
+
 #endif //PRODUCT_H

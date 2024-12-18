@@ -4,7 +4,7 @@
 
 #ifndef EMPLOYEE_H
 #define EMPLOYEE_H
-
+#include "base_model.h"
 typedef struct {
     BaseModel base_model;
     char* name;
