@@ -16,7 +16,9 @@ add_executable(hdu_ctask main.c
         dal/query/sale_query.h
         dal/model/employee.h
         dal/model/product.h
-        dal/model/sale.h)
+        dal/model/sale.h
+        dal/model/base_model.h
+)
 
 if(SQLITE3_FOUND)
     include_directories(${SQLite3_INCLUDE_DIRS})

@@ -6,9 +6,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "../db.h"
+
 
 // 创建员工表
-int create_employee_table(sqlite3* db) {
+int create_employee_table() {
     const char* sql = "CREATE TABLE IF NOT EXISTS employees ("
                       "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                       "name TEXT NOT NULL,"
@@ -18,11 +20,12 @@ int create_employee_table(sqlite3* db) {
                       "updated_at TEXT DEFAULT CURRENT_TIMESTAMP,"
                       "deleted_at TEXT"
                       ");";
-    return execute_sql(db, sql);
+    return execute_sql(sql);
 }
 
 // 增加员工
-int add_employee(sqlite3* db, const Employee* employee) {
+int add_employee(const Employee* employee) {
+    sqlite3* db = get_db();
     const char* sql = "INSERT INTO employees (name, gender, birthday) VALUES (?, ?, ?);";
     sqlite3_stmt* stmt;
 
@@ -45,7 +48,8 @@ int add_employee(sqlite3* db, const Employee* employee) {
 }
 
 // 删除员工
-int delete_employee(sqlite3* db, int id) {
+int delete_employee(int id) {
+    sqlite3* db = get_db();
     const char* sql = "DELETE FROM employees WHERE id = ?;";
     sqlite3_stmt* stmt;
 
@@ -66,7 +70,8 @@ int delete_employee(sqlite3* db, int id) {
 }
 
 // 更新员工
-int update_employee(sqlite3* db, const Employee* employee) {
+int update_employee(const Employee* employee) {
+    sqlite3* db = get_db();
     const char* sql = "UPDATE employees SET name = ?, gender = ?, birthday = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?;";
     sqlite3_stmt* stmt;
 
@@ -90,7 +95,8 @@ int update_employee(sqlite3* db, const Employee* employee) {
 }
 
 // 按ID查找员工
-Employee* employee_find_by_id(sqlite3* db, int id) {
+Employee* employee_find_by_id(int id) {
+    sqlite3* db = get_db();
     const char* sql = "SELECT id, name, gender, birthday, created_at, updated_at, deleted_at FROM employees WHERE id = ?;";
     sqlite3_stmt* stmt;
 
@@ -118,7 +124,8 @@ Employee* employee_find_by_id(sqlite3* db, int id) {
 }
 
 // 按名字查找员工
-Employee* employee_find_by_name(sqlite3* db, const char* name) {
+Employee* employee_find_by_name(const char* name) {
+    sqlite3* db = get_db();
     const char* sql = "SELECT id, name, gender, birthday, created_at, updated_at, deleted_at FROM employees WHERE name = ?;";
     sqlite3_stmt* stmt;
 
@@ -155,7 +162,8 @@ void free_employees(Employee** employees) {
     free(employees);
 }
 // 查找所有员工
-Employee** employee_find_all(sqlite3* db) {
+Employee** employee_find_all() {
+    sqlite3* db = get_db();
     const char* sql = "SELECT id, name, gender, birthday, created_at, updated_at, deleted_at FROM employees;";
     sqlite3_stmt* stmt;
     // 准备SQL语句
@@ -212,7 +220,8 @@ Employee** employee_find_all(sqlite3* db) {
 
 
 // 员工总数
-int employee_count(sqlite3* db) {
+int employee_count() {
+    sqlite3* db = get_db();
     const char* sql = "SELECT COUNT(*) FROM employees;";
     sqlite3_stmt* stmt;
 

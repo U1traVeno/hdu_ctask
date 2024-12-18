@@ -4,6 +4,7 @@
 
 #ifndef SALE_H
 #define SALE_H
+#include "base_model.h"
 
 typedef struct {
     BaseModel base_model;
@@ -13,4 +14,5 @@ typedef struct {
     double price;
     char* date;
 } Sale;
+
 #endif //SALE_H

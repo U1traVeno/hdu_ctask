@@ -7,8 +7,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../db.h"
 
-int create_product_table(sqlite3* db) {
+int create_product_table() {
     const char* sql = "CREATE TABLE IF NOT EXISTS products ("
                       "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                       "name TEXT NOT NULL,"
@@ -19,10 +20,11 @@ int create_product_table(sqlite3* db) {
                       "updated_at TEXT DEFAULT CURRENT_TIMESTAMP,"
                       "deleted_at TEXT"
                       ");";
-    return execute_sql(db, sql);
+    return execute_sql(sql);
 }
 
-int add_product(sqlite3* db, Product* product) {
+int add_product(Product* product) {
+    sqlite3* db = get_db();
     const char* sql = "INSERT INTO products (name, type, description, price) VALUES (?, ?, ?, ?);";
     sqlite3_stmt* stmt;
 
@@ -45,7 +47,8 @@ int add_product(sqlite3* db, Product* product) {
     return rc == SQLITE_DONE ? SQLITE_OK : rc;
 }
 
-int delete_product(sqlite3* db, int id) {
+int delete_product(int id) {
+    sqlite3* db = get_db();
     const char* sql = "DELETE FROM products WHERE id = ?;";
     sqlite3_stmt* stmt;
 
@@ -65,7 +68,8 @@ int delete_product(sqlite3* db, int id) {
     return rc == SQLITE_DONE ? SQLITE_OK : rc;
 }
 
-Product* product_find_by_id(sqlite3* db, int id) {
+Product* product_find_by_id(int id) {
+    sqlite3* db = get_db();
     const char* sql = "SELECT id, name, type, description, price, created_at, updated_at, deleted_at FROM products WHERE id = ?;";
     sqlite3_stmt* stmt;
 
@@ -93,7 +97,8 @@ Product* product_find_by_id(sqlite3* db, int id) {
     return product;
 }
 // 按名字查找产品
-Product* product_find_by_name(sqlite3* db, const char* name) {
+Product* product_find_by_name(const char* name) {
+    sqlite3* db = get_db();
     const char* sql = "SELECT id, name, type, description, price, created_at, updated_at, deleted_at FROM products WHERE name = ?;";
     sqlite3_stmt* stmt;
 
@@ -133,7 +138,8 @@ void free_products(Product** products) {
     free(products);
 }
 
-Product** product_find_all(sqlite3* db) {
+Product** product_find_all() {
+    sqlite3* db = get_db();
     const char* sql = "SELECT id, name, type, description, price, created_at, updated_at, deleted_at FROM products;";
     sqlite3_stmt* stmt;
 
@@ -186,7 +192,8 @@ Product** product_find_all(sqlite3* db) {
 }
 
 // 产品总数
-int product_count(sqlite3* db) {
+int product_count() {
+    sqlite3* db = get_db();
     const char* sql = "SELECT COUNT(*) FROM products;";
     sqlite3_stmt* stmt;
 

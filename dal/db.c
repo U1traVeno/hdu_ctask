@@ -3,30 +3,48 @@
 //
 
 #include "db.h"
-#include <stdio.h>
 #include <sqlite3.h>
 
+static sqlite3* global_db = nullptr;  // 全局数据库连接
+
 sqlite3* db_open(const char* path) {
-    sqlite3* db;
-    const int rc = sqlite3_open(path, &db);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+    if (global_db != nullptr) {
+        return global_db;  // 如果已经打开，直接返回
+    }
+
+    int result = sqlite3_open(path, &global_db);
+    if (result != SQLITE_OK) {
         return nullptr;
     }
-    return db;
+
+    return global_db;
 }
 
-int execute_sql(sqlite3* db, const char* sql) {
-    char* errMsg;
-    const int rc = sqlite3_exec(db, sql, nullptr, nullptr, &errMsg);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errMsg);
-        sqlite3_free(errMsg);
-        return 1;
+sqlite3* get_db() {
+    return global_db;  // 返回全局数据库连接
+}
+
+void db_close() {
+    if (global_db != nullptr) {
+        sqlite3_close(global_db);
+        global_db = nullptr;  // 关闭数据库后将指针置为nullptr
     }
-    return 0;
 }
 
-void db_close(sqlite3* db) {
-    sqlite3_close(db);
+int execute_sql(const char* sql) {
+    if (global_db == nullptr) {
+        return -1;  // 没有打开数据库，返回错误
+    }
+
+    char* error_message = nullptr;
+    int result = sqlite3_exec(global_db, sql, nullptr, nullptr, &error_message);
+    if (result != SQLITE_OK) {
+        sqlite3_free(error_message);
+        return -1;  // 执行失败
+    }
+
+    return 0;  // 成功
 }
+
+
+
