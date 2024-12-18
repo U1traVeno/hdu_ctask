@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "dal/db.h"
-#include "dal/query/employee.h"
+#include "dal/query/employee_query.h"
 
 
 int main() {

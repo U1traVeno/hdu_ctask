@@ -4,7 +4,6 @@
 
 #ifndef EMPLOYEE_H
 #define EMPLOYEE_H
-#include <sqlite3.h>
 
 typedef struct {
     int id;

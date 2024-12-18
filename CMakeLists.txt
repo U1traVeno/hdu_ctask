@@ -8,12 +8,12 @@ FIND_PACKAGE(SQLite3 REQUIRED)
 add_executable(hdu_ctask main.c
         dal/db.c
         dal/db.h
-        dal/query/employee.c
-        dal/query/employee.h
-        dal/query/product.c
-        dal/query/product.h
-        dal/query/sales.c
-        dal/query/sales.h
+        dal/query/employee_query.c
+        dal/query/employee_query.h
+        dal/query/product_query.c
+        dal/query/product_query.h
+        dal/query/sale_query.c
+        dal/query/sale_query.h
         dal/model/employee.h
         dal/model/product.h
         dal/model/sale.h)
