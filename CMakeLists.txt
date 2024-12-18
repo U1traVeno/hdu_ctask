@@ -18,6 +18,8 @@ add_executable(hdu_ctask main.c
         dal/model/product.h
         dal/model/sale.h
         dal/model/base_model.h
+        util/utils.c
+        util/utils.h
 )
 
 if(SQLITE3_FOUND)
