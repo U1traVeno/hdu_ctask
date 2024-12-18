@@ -6,7 +6,7 @@
 #define SALE_H
 
 typedef struct {
-    int id;
+    BaseModel base_model;
     int employee_id;
     int product_id;
     int quantity;

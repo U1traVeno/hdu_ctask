@@ -6,7 +6,7 @@
 #define PRODUCT_H
 
 typedef struct {
-    int id;
+    BaseModel base_model;
     char* name;
     char* type;
     char* description;

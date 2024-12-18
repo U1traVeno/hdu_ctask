@@ -14,7 +14,7 @@ int add_product(sqlite3* db, Product* product);
 int delete_product(sqlite3* db, int id);
 int update_product(sqlite3* db, Product* product);
 Product* product_find_by_id(sqlite3* db, int id);
-Product* product_find_by_name(sqlite3* db, char* name);
+Product* product_find_by_name(sqlite3* db, const char* name);
 Product** product_find_all(sqlite3* db);
 int product_count(sqlite3* db);
 

@@ -6,11 +6,10 @@
 #define EMPLOYEE_H
 
 typedef struct {
-    int id;
+    BaseModel base_model;
     char* name;
     char* gender;
     char* birthday;
-    char* address;
 } Employee;
 
 #endif //EMPLOYEE_H
