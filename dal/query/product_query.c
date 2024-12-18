@@ -114,7 +114,7 @@ Product* product_find_by_name(sqlite3* db, const char* name) {
         product->price = sqlite3_column_double(stmt, 4);
         product->base_model.created_at = strdup((const char*)sqlite3_column_text(stmt, 5));
         product->base_model.updated_at = strdup((const char*)sqlite3_column_text(stmt, 6));
-        product->base_model.deleted_at = sqlite3_column_text(stmt, 7) ? strdup((const char*)sqlite3_column_text(stmt, 7)) : NULL;
+        product->base_model.deleted_at = sqlite3_column_text(stmt, 7) ? strdup((const char*)sqlite3_column_text(stmt, 7)) : nullptr;
     }
 
     sqlite3_finalize(stmt);
@@ -122,7 +122,17 @@ Product* product_find_by_name(sqlite3* db, const char* name) {
 }
 
 // 查找所有产品
-// TODO 这里的实现有内存泄漏，需要释放内存
+
+void free_products(Product** products) {
+    for (int i = 0; products[i] != nullptr; i++) {
+        free(products[i]->base_model.created_at);
+        free(products[i]->base_model.updated_at);
+        free(products[i]->base_model.deleted_at);
+        free(products[i]);
+    }
+    free(products);
+}
+
 Product** product_find_all(sqlite3* db) {
     const char* sql = "SELECT id, name, type, description, price, created_at, updated_at, deleted_at FROM products;";
     sqlite3_stmt* stmt;
@@ -136,11 +146,15 @@ Product** product_find_all(sqlite3* db) {
     int count = 0;
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
-        products = realloc(products, sizeof(Product*) * (count + 1));
-        if (!products) {
+        void * tmp = realloc(products, sizeof(Product*) * (count + 1));
+        if (tmp == nullptr) {
             fprintf(stderr, "Failed to allocate memory\n");
-            return nullptr; // 此处使用malloc分配内存
+            free_products(products);
+            sqlite3_finalize(stmt);
+            return nullptr;
         }
+        products = tmp;
+
         Product* product = malloc(sizeof(Product));
 
         product->base_model.id = sqlite3_column_int(stmt, 0);
@@ -150,12 +164,21 @@ Product** product_find_all(sqlite3* db) {
         product->price = sqlite3_column_double(stmt, 4);
         product->base_model.created_at = strdup((const char*)sqlite3_column_text(stmt, 5));
         product->base_model.updated_at = strdup((const char*)sqlite3_column_text(stmt, 6));
-        product->base_model.deleted_at = sqlite3_column_text(stmt, 7) ? strdup((const char*)sqlite3_column_text(stmt, 7)) : nullptr;
+        product->base_model.deleted_at = sqlite3_column_text(stmt, 7) ? strdup((const char*)sqlite3_column_text(stmt, 7)) : nullptr; // 解释：如果deleted_at不为空，则复制deleted_at的值，否则为nullptr
 
         products[count++] = product;
+        free_products(tmp); // 释放临时指针
     }
 
-    products = realloc(products, sizeof(Product*) * (count + 1));
+    void * tmp = realloc(products, sizeof(Product*) * (count + 1));
+    if (tmp == nullptr) {
+        fprintf(stderr, "Failed to allocate memory\n");
+        free_products(products);
+        sqlite3_finalize(stmt);
+        return nullptr;
+    }
+    products = tmp;
+
     products[count] = nullptr; // Null-terminate the array
 
     sqlite3_finalize(stmt);

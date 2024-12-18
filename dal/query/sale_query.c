@@ -173,7 +173,16 @@ Sale* sale_find_by_product_id(sqlite3* db, const int product_id) {
     return sale;
 }
 
-// TODO 这里的实现有内存泄漏，需要释放内存
+void free_sales(Sale** sales) {
+    for (int i = 0; sales[i] != nullptr; i++) {
+        free(sales[i]->base_model.created_at);
+        free(sales[i]->base_model.updated_at);
+        free(sales[i]->base_model.deleted_at);
+        free(sales[i]);
+    }
+    free(sales);
+}
+
 Sale** sale_find_all(sqlite3* db) {
     const char* sql = "SELECT id, product_id, employee_id, quantity, price, created_at, updated_at, deleted_at FROM sales;";
     sqlite3_stmt* stmt;
@@ -185,9 +194,28 @@ Sale** sale_find_all(sqlite3* db) {
 
     Sale** sales = nullptr;
     int count = 0;
+
     while (sqlite3_step(stmt) == SQLITE_ROW) {
-        sales = realloc(sales, sizeof(Sale*) * (count + 1));
+        // 重新分配内存
+        void* tmp = realloc(sales, sizeof(Sale*) * (count + 1));
+        if (tmp == nullptr) {
+            fprintf(stderr, "Failed to allocate memory\n");
+            free_sales(sales); // 清理已分配资源
+            sqlite3_finalize(stmt);
+            return nullptr;
+        }
+        sales = tmp;
+
+        // 分配 Sale 结构体
         sales[count] = malloc(sizeof(Sale));
+        if (sales[count] == nullptr) {
+            fprintf(stderr, "Failed to allocate memory for Sale object\n");
+            free_sales(sales); // 清理已分配资源
+            sqlite3_finalize(stmt);
+            return nullptr;
+        }
+
+        // 填充结构体
         sales[count]->base_model.id = sqlite3_column_int(stmt, 0);
         sales[count]->product_id = sqlite3_column_int(stmt, 1);
         sales[count]->employee_id = sqlite3_column_int(stmt, 2);
@@ -196,12 +224,37 @@ Sale** sale_find_all(sqlite3* db) {
         sales[count]->base_model.created_at = strdup((const char*)sqlite3_column_text(stmt, 5));
         sales[count]->base_model.updated_at = strdup((const char*)sqlite3_column_text(stmt, 6));
         sales[count]->base_model.deleted_at = sqlite3_column_text(stmt, 7) ? strdup((const char*)sqlite3_column_text(stmt, 7)) : nullptr;
+
+        // 检查字符串字段是否成功分配
+        if (!sales[count]->base_model.created_at || !sales[count]->base_model.updated_at ||
+            (sqlite3_column_text(stmt, 7) && !sales[count]->base_model.deleted_at)) {
+            fprintf(stderr, "Failed to allocate memory for string fields\n");
+            free_sales(sales); // 清理已分配资源
+            sqlite3_finalize(stmt);
+            return nullptr;
+        }
+
+        // 递增计数器
         count++;
+        free_sales(tmp); // 释放临时指针
     }
+
+    // 为最后一个元素添加 NULL
+    void* tmp = realloc(sales, sizeof(Sale*) * (count + 1));
+    if (tmp == nullptr) {
+        fprintf(stderr, "Failed to allocate memory for final null-terminated array\n");
+        free_sales(sales); // 清理已分配资源
+        sqlite3_finalize(stmt);
+        return nullptr;
+    }
+    sales = tmp;
+    sales[count] = nullptr; // 末尾设置为 nullptr 方便遍历
 
     sqlite3_finalize(stmt);
     return sales;
 }
+
+
 
 int sale_count(sqlite3* db) {
     const char* sql = "SELECT COUNT(*) FROM sales;";

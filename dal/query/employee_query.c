@@ -145,12 +145,20 @@ Employee* employee_find_by_name(sqlite3* db, const char* name) {
     return employee;
 }
 
+void free_employees(Employee** employees) {
+    for (int i = 0; employees[i] != nullptr; i++) {
+        free(employees[i]->base_model.created_at);
+        free(employees[i]->base_model.updated_at);
+        free(employees[i]->base_model.deleted_at);
+        free(employees[i]);
+    }
+    free(employees);
+}
 // 查找所有员工
-// TODO 这里的实现有内存泄漏，需要释放内存
 Employee** employee_find_all(sqlite3* db) {
     const char* sql = "SELECT id, name, gender, birthday, created_at, updated_at, deleted_at FROM employees;";
     sqlite3_stmt* stmt;
-
+    // 准备SQL语句
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
         fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
         return nullptr;
@@ -158,32 +166,50 @@ Employee** employee_find_all(sqlite3* db) {
 
     Employee** employees = nullptr;
     int count = 0;
-
+    // 遍历结果集
     while (sqlite3_step(stmt) == SQLITE_ROW) {
-        employees = realloc(employees, sizeof(Employee*) * (count + 1));
-        if (!employees) {
+        void * tmp = realloc(employees, sizeof(Employee*) * (count + 1));
+        if (tmp == nullptr) {
+            // 释放内存
             fprintf(stderr, "Failed to allocate memory\n");
+            free_employees(employees);
+            sqlite3_finalize(stmt);
             return nullptr;
         }
+        // 更新employees指针
+        employees = tmp;
+        // 分配内存
         Employee* employee = malloc(sizeof(Employee));
 
+        // 从结果集中读取数据
         employee->base_model.id = sqlite3_column_int(stmt, 0);
         employee->name = strdup((const char*)sqlite3_column_text(stmt, 1));
         employee->gender = strdup((const char*)sqlite3_column_text(stmt, 2));
         employee->birthday = strdup((const char*)sqlite3_column_text(stmt, 3));
         employee->base_model.created_at = strdup((const char*)sqlite3_column_text(stmt, 4));
         employee->base_model.updated_at = strdup((const char*)sqlite3_column_text(stmt, 5));
-        employee->base_model.deleted_at = sqlite3_column_text(stmt, 6) ? strdup((const char*)sqlite3_column_text(stmt, 6)) : NULL;
-
-        employees[count++] = employee;
+        employee->base_model.deleted_at = sqlite3_column_text(stmt, 6) ? strdup((const char*)sqlite3_column_text(stmt, 6)) : nullptr;
+        // 更新数组
+        employees[count] = employee;
+        free_employees(tmp);
     }
 
-    employees = realloc(employees, sizeof(Employee*) * (count + 1));
-    employees[count] = NULL; // Null-terminate the array
+    // 防止realloc失败导致空指针
+    void * tmp = realloc(employees, sizeof(Employee*) * (count + 1));
+    if (tmp == nullptr) {
+        fprintf(stderr, "Failed to allocate memory for final null-terminated array\n");
+        free_employees(employees);
+        sqlite3_finalize(stmt);
+        return nullptr;
+    }
+    employees = tmp;
+
+    employees[count] = nullptr; // 在数组的最后一个元素设置为nullptr，以便在遍历时判断数组的结束
 
     sqlite3_finalize(stmt);
     return employees;
 }
+
 
 // 员工总数
 int employee_count(sqlite3* db) {
