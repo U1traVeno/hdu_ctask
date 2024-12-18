@@ -13,8 +13,9 @@ int add_sale(const Sale* sale);
 int delete_sale(int id);
 int update_sale(const Sale* sale);
 Sale* sale_find_by_id(int id);
-Sale* sale_find_by_employee_id(int employee_id);
-Sale* sale_find_by_product_id(int product_id);
+Sale** sale_find_by_employee_id(int employee_id);
+Sale** sale_find_by_product_id(int product_id);
+Sale** sale_find_by_date(const char* date); // 自动识别日期格式并查询, 支持 YYYY-MM-DD, YYYY-MM, YYYY 格式
 Sale** sale_find_all();
 int sales_count();
 
