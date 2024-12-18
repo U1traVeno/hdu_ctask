@@ -68,6 +68,31 @@ int delete_product(int id) {
     return rc == SQLITE_DONE ? SQLITE_OK : rc;
 }
 
+int update_product(Product* product) {
+    sqlite3* db = get_db();
+    const char* sql = "UPDATE products SET name = ?, type = ?, description = ?, price = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?;";
+    sqlite3_stmt* stmt;
+
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
+        return SQLITE_ERROR;
+    }
+
+    sqlite3_bind_text(stmt, 1, product->name, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, product->type, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, product->description, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_double(stmt, 4, product->price);
+    sqlite3_bind_int(stmt, 5, product->base_model.id);
+
+    const int rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        fprintf(stderr, "Failed to update product: %s\n", sqlite3_errmsg(db));
+    }
+
+    sqlite3_finalize(stmt);
+    return rc == SQLITE_DONE ? SQLITE_OK : rc;
+}
+
 Product* product_find_by_id(int id) {
     sqlite3* db = get_db();
     const char* sql = "SELECT id, name, type, description, price, created_at, updated_at, deleted_at FROM products WHERE id = ?;";
