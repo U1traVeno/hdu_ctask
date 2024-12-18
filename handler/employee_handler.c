@@ -6,7 +6,6 @@
 
 #include <stdlib.h>
 
-#include "employee_handler.h"
 #include "../dal/model/employee.h"
 #include "../dal/query/employee_query.h"
 #include <string.h>
@@ -31,10 +30,10 @@ int add_employee_handler(int id, const char* name, const char* gender, const cha
     strncpy(new_employee->birthday, birthday, sizeof(new_employee->birthday) - 1);
     new_employee->birthday[sizeof(new_employee->birthday) - 1] = '\0';
 
-    int result = add_employee(, new_employee); // 传入数据库对象（如sqlite3* db）
+    int result = add_employee(new_employee);
     free(new_employee);
 
-    return result == 0 ? 0 : -1;
+    return result == 0 ? 0 : -1; // 如果add_employee返回0则返回0，否则返回-1
 }
 
 // 根据id删除员工，返回0表示成功，-1表示失败
@@ -43,7 +42,7 @@ int delete_employee_handler(int id) {
         return -1;
     }
 
-    int result = delete_employee(NULL, id);
+    int result = delete_employee(id);
     return result == 0 ? 0 : -1;
 }
 
@@ -65,33 +64,33 @@ int update_employee_handler(const int id, const char* name, const char* gender, 
     strncpy(existing_employee->birthday, birthday, sizeof(existing_employee->birthday) - 1);
     existing_employee->birthday[sizeof(existing_employee->birthday) - 1] = '\0';
 
-    int result = update_employee(NULL, existing_employee);
+    int result = update_employee(existing_employee);
     return result == 0 ? 0 : -1;
 }
 
-// 根据id查找员工，返回员工指针，如果没有找到则返回NULL
+// 根据id查找员工，返回员工指针，如果没有找到则返回nullptr
 Employee* find_employee_by_id_handler(int id) {
     if (id <= 0) {
-        return NULL;
+        return nullptr;
     }
 
-    Employee* employee = employee_find_by_id(NULL, id); // 传入数据库对象（如sqlite3* db）
+    Employee* employee = employee_find_by_id(id);
     return employee;
 }
 
 // 根据name查找员工，返回员工指针，如果没有找到则返回NULL
 Employee* find_employee_by_name_handler(const char* name) {
     if (name == NULL) {
-        return NULL;
+        return nullptr;
     }
 
-    Employee* employee = employee_find_by_name(NULL, name); // 传入数据库对象（如sqlite3* db）
+    Employee* employee = employee_find_by_name(name);
     return employee;
 }
 
 // 查找所有员工，返回员工指针数组，如果没有找到则返回NULL
 Employee** find_all_employee_handler() {
-    Employee** employees = employee_find_all(NULL); // 传入数据库对象（如sqlite3* db）
+    Employee** employees = employee_find_all();
     return employees;
 }
 
