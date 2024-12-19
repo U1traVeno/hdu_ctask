@@ -22,6 +22,16 @@ add_executable(hdu_ctask main.c
         util/utils.h
         handler/report_handler.c
         handler/report_handler.h
+        handler/employee_handler.c
+        handler/employee_handler.h
+        handler/product_handler.c
+        handler/product_handler.h
+        handler/sale_handler.c
+        handler/sale_handler.h
+        cli/menu.c
+        cli/menu.h
+        cli/cil_utils.c
+        cli/cil_utils.h
 )
 
 if(SQLITE3_FOUND)

@@ -82,7 +82,7 @@ Sale* find_sale_by_id_handler(int id) {
     return sale_find_by_id(id);
 }
 
-Sale* find_sale_by_employee_id_handler(int employee_id) {
+Sale** find_sale_by_employee_id_handler(int employee_id) {
     if (employee_id <= 0) {
         return nullptr;
     }
@@ -90,7 +90,7 @@ Sale* find_sale_by_employee_id_handler(int employee_id) {
     return sale_find_by_employee_id(employee_id);
 }
 
-Sale* find_sale_by_product_id_handler(int product_id) {
+Sale** find_sale_by_product_id_handler(int product_id) {
     if (product_id <= 0) {
         return nullptr;
     }

@@ -15,9 +15,9 @@ int update_sale_handler(int id, int employee_id, int product_id, int quantity, d
 // 根据id查找销售记录, 返回销售记录指针, 如果没有找到则返回nullptr
 Sale* find_sale_by_id_handler(int id);
 // 根据employee_id查找销售记录, 返回销售记录指针, 如果没有找到则返回nullptr
-Sale* find_sale_by_employee_id_handler(int employee_id);
+Sale** find_sale_by_employee_id_handler(int employee_id);
 // 根据product_id查找销售记录, 返回销售记录指针, 如果没有找到则返回nullptr
-Sale* find_sale_by_product_id_handler(int product_id);
+Sale** find_sale_by_product_id_handler(int product_id);
 // 查找所有销售记录, 返回销售记录指针数组, 如果没有找到则返回nullptr
 Sale** find_all_sale_handler();
 

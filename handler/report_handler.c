@@ -53,7 +53,7 @@ void print_product_sales_by_date(const char* month)
 {
     Sale** sales = sale_find_by_date(month);
     // 计算记录总数
-    int sale_count = 0;
+    size_t sale_count = 0;
     for (int i = 0; sales[i] != nullptr; i++) {
         sale_count++;
     }
@@ -84,7 +84,7 @@ void print_product_sales_by_date(const char* month)
         product_sales[product_id].total_sales_amount += amount;
     }
     // 排序
-    qsort(product_sales, sales_count, sizeof(product_sales[0]), compare_sales_amount);
+    qsort(product_sales, sale_count, sizeof(product_sales[0]), compare_sales_amount);
 
     // 打印表格
     printf("\n 产品销售情况报表 \n");
@@ -105,7 +105,7 @@ void print_product_sales_by_date(const char* month)
 void print_employee_sales_by_date(const char* month) {
     Sale** sales = sale_find_by_date(month);
     // 计算记录总数
-    int sale_count = 0;
+    size_t sale_count = 0;
     for (int i = 0; sales[i] != nullptr; i++) {
         sale_count++;
     }
@@ -134,7 +134,7 @@ void print_employee_sales_by_date(const char* month) {
         employee_sales[employee_id].total_sales_amount += amount;
     }
     // 排序
-    qsort(employee_sales, sales_count, sizeof(employee_sales[0]), compare_sales_amount);
+    qsort(employee_sales, sale_count, sizeof(employee_sales[0]), compare_sales_amount);
 
     // 打印表格
     printf("\n 员工销售情况报表 \n");
