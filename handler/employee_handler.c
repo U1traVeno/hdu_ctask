@@ -11,9 +11,25 @@
 #include <string.h>
 #include <stdio.h>
 
-// 创建employee结构体，传入id, name, gender, birthday，返回0表示成功，-1表示失败
-int add_employee_handler(int id, const char* name, const char* gender, const char* birthday) {
-    if (id <= 0 || name == NULL || gender == NULL || birthday == NULL) {
+void print_employee(Employee* employee) {
+    if (!employee) {
+        printf("员工不存在\n");
+        return;
+    }
+
+    printf("员工编号: %d\n", employee->base_model.id);
+    printf("员工姓名: %s\n", employee->name);
+    printf("员工性别: %s\n", employee->gender);
+    printf("员工生日: %s\n", employee->birthday);
+}
+
+int employee_get_next_id() {
+    return employee_count() + 1;
+}
+
+// 创建employee结构体，传入name, gender, birthday，返回0表示成功，-1表示失败
+int add_employee_handler(const char* name, const char* gender, const char* birthday) {
+    if (name == NULL || gender == NULL || birthday == NULL) {
         return -1;
     }
 
@@ -22,7 +38,9 @@ int add_employee_handler(int id, const char* name, const char* gender, const cha
         return -1;
     }
 
-    new_employee->base_model.id = id;
+//    new_employee->base_model.id = id; 不好, id是自增的
+    //自动分配id
+    new_employee->base_model.id = employee_get_next_id();
     strncpy(new_employee->name, name, sizeof(new_employee->name) - 1);
     new_employee->name[sizeof(new_employee->name) - 1] = '\0';
     strncpy(new_employee->gender, gender, sizeof(new_employee->gender) - 1);

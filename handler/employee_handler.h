@@ -7,8 +7,9 @@
 
 #include "../dal/model/employee.h"
 
+void print_employee(Employee* employee);
 // 创建employee结构体, 传入id, name, gender, birthday, 返回0表示成功, -1表示失败
-int add_employee_handler(int id, const char* name, const char* gender, const char* birthday);
+int add_employee_handler(const char* name, const char* gender, const char* birthday);
 // 根据id删除员工, 返回0表示成功, -1表示失败
 int delete_employee_handler(int id);
 // 更新员工信息, 传入与create_employee相同的参数, 返回0表示成功, -1表示失败(员工不存在)
